@@ -4,6 +4,7 @@ from zope.component import queryUtility
 from plone.registry.interfaces import IRegistry
 
 from repodono.registry.interfaces import IUtilityRegistry
+from repodono.registry import logger
 
 import textwrap
 
@@ -55,8 +56,20 @@ class UtilityRegistry(object):
         """
 
         registry = queryUtility(IRegistry)
-        if queryUtility(self.interface, name=name):
-            registry[self.name] = registry[self.name] + [name]
+        enabled = set()
+        result = []
+
+        if registry is None:
+            logger.warning('Plone registry is not available, doing nothing.')
+            return
+
+        for n in registry[self.name] + [name]:
+            if n in enabled or not queryUtility(self.interface, name=n):
+                continue
+            enabled.add(n)
+            result.append(n)
+
+        registry[self.name] = result
 
     def disable(self, name):
         """
@@ -65,6 +78,11 @@ class UtilityRegistry(object):
         """
 
         registry = queryUtility(IRegistry)
+
+        if registry is None:
+            logger.warning('Plone registry is not available, doing nothing.')
+            return
+
         original = registry[self.name]
         registry[self.name] = [
             n for n in original

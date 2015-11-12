@@ -1,0 +1,15 @@
+<configure
+    xmlns="http://namespaces.zope.org/meta"
+    i18n_domain="repodono.registry">
+
+  <directives namespace="http://namespaces.physiomeproject.org/repodono">
+
+    <directive
+        name="utilities"
+        schema=".metaconfigure.IUtilityRegistryDirective"
+        handler=".metaconfigure.UtilityRegistryDirective"
+        />
+
+  </directives>
+
+</configure>

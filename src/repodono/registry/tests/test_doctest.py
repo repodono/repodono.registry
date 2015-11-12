@@ -11,6 +11,12 @@ path = lambda x: join('..', x)
 def test_suite():
     return unittest.TestSuite((
         doctest.DocFileSuite(
+            path('directives.rst'),
+            setUp=zope.component.testing.setUp,
+            tearDown=zope.component.testing.tearDown
+        ),
+
+        doctest.DocFileSuite(
             path('utilities.rst'),
             setUp=zope.component.testing.setUp,
             tearDown=zope.component.testing.tearDown

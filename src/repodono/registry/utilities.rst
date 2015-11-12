@@ -128,3 +128,26 @@ Likewise, disable should work as expected, ignoring unregistered names::
     >>> registration.disable('remote')
     >>> registry
     {'repodono.test.backend': ['local']}
+
+Enabling while the registry field has any extra names that may have been
+registered before should not continue to persist (triggering potential
+schema violation)::
+
+    >>> registry['repodono.test.backend'] = ['bad', 'local']
+    >>> registration.enable('remote')
+    >>> registry
+    {'repodono.test.backend': ['local', 'remote']}
+
+Likewise, disable should work as expected, ignoring unregistered names::
+
+    >>> registration.disable('unregistered')
+    >>> registration.disable('remote')
+    >>> registry
+    {'repodono.test.backend': ['local']}
+
+Calling multiple enables should not result in extra entries::
+
+    >>> registration.enable('local')
+    >>> registration.enable('local')
+    >>> registry
+    {'repodono.test.backend': ['local']}
