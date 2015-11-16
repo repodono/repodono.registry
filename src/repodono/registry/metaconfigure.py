@@ -8,7 +8,6 @@ from zope.interface import Interface
 from zope.schema import TextLine
 from zope.schema.interfaces import IVocabularyFactory
 from zope.schema.vocabulary import SimpleVocabulary
-from zope.schema.vocabulary import getVocabularyRegistry
 
 from plone.registry.interfaces import IRegistry
 
@@ -114,8 +113,6 @@ def UtilityRegistryDirective(_context, interface, name, title,
 
         return SimpleVocabulary(terms)
 
-    vr = getVocabularyRegistry()
-
     utility(
         _context,
         provides=IVocabularyFactory,
@@ -123,15 +120,11 @@ def UtilityRegistryDirective(_context, interface, name, title,
         component=AvailableVocabFactory,
     )
 
-    vr.register(available_vocab, AvailableVocabFactory)
-
     utility(
         _context,
         provides=IVocabularyFactory,
         name=enabled_vocab,
         component=EnabledVocabFactory,
     )
-
-    vr.register(enabled_vocab, EnabledVocabFactory)
 
     # The actual fields will need to be registered through registry.xml

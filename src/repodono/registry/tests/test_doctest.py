@@ -8,17 +8,34 @@ import zope.component.testing
 path = lambda x: join('..', x)
 
 
+def setUp(suite):
+    zope.component.testing.setUp(suite)
+
+    try:
+        from Zope2.App.schema import configure_vocabulary_registry
+    except ImportError:
+        try:
+            from zope.schema.vocabulary import setVocabularyRegistry
+            from Products.Five.schema import Zope2VocabularyRegistry
+        except ImportError:
+            pass
+        else:
+            setVocabularyRegistry(Zope2VocabularyRegistry())
+    else:
+        configure_vocabulary_registry()
+
+
 def test_suite():
     return unittest.TestSuite((
         doctest.DocFileSuite(
             path('directives.rst'),
-            setUp=zope.component.testing.setUp,
+            setUp=setUp,
             tearDown=zope.component.testing.tearDown
         ),
 
         doctest.DocFileSuite(
             path('utilities.rst'),
-            setUp=zope.component.testing.setUp,
+            setUp=setUp,
             tearDown=zope.component.testing.tearDown
         ),
     ))
