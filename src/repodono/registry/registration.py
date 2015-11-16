@@ -64,7 +64,7 @@ class UtilityRegistry(object):
         if record is None:
             logger.warning(
                 'The registry key for the utility registry `%s` is not '
-                'registered.')
+                'registered.', self.name)
             return False
 
         if not (IList.providedBy(record.field) and
@@ -73,7 +73,7 @@ class UtilityRegistry(object):
                     self.available_vocab):
             logger.warning(
                 'The registry key for the utility registry `%s` is registered '
-                'incorrectly.')
+                'incorrectly.', self.name)
             return False
 
         return True
