@@ -169,10 +169,69 @@ conflicts::
     >>> registry['repodono.message.utility']
     [u'basic', u'luxury']
 
-TODO: document how might the ordering of the enabled vocabulary on
-various manipulation methods be determined.
+Direct assignment::
+
+    >>> registry['repodono.message.utility'] = [u'basic', u'luxury']
+
+In practice, this definition is defined using XML, and integrators may
+omit the default empty list value as there are versionsn where the
+schema isn't fully created with the default empty list value.  So to
+test that the composition still works, remove the original record entry,
+then use zcml to register the required components to enable the usage of
+the dummy context to register the registry entry::
+
+    >>> del registry.records['repodono.message.utility']
+
+    >>> configuration = """\
+    ... <configure xmlns="http://namespaces.zope.org/zope">
+    ...     <include package="zope.component" file="meta.zcml" />
+    ...     <include package="plone.registry" />
+    ...     <include package="plone.app.registry.exportimport"
+    ...         file="handlers.zcml" />
+    ... </configure>
+    ... """
+    >>> xmlconfig.xmlconfig(StringIO(configuration))
+
+    >>> from Products.GenericSetup.tests.common import DummyImportContext
+    >>> from plone.app.registry.exportimport.handler import importRegistry
+    >>> from OFS.ObjectManager import ObjectManager
+    >>> site = ObjectManager('plone')
+    >>> xml = """\
+    ... <registry>
+    ...   <record name="repodono.message.utility">
+    ...     <field type="plone.registry.field.List">
+    ...       <title>Simple list of choices</title>
+    ...       <value_type type="plone.registry.field.Choice">
+    ...         <vocabulary>repodono.message.utility.available</vocabulary>
+    ...       </value_type>
+    ...     </field>
+    ...   </record>
+    ... </registry>
+    ... """
+    >>> context = DummyImportContext(site, purge=False)
+    >>> context._files = {'registry.xml': xml}
+    >>> importRegistry(context)
+
+    >>> registry['repodono.message.utility']
+
+Vocabulary should still work::
+
+    >>> list(v.value for v in v_enabled(None))
+    []
+    >>> u.enable(u'basic')
+    >>> registry['repodono.message.utility']
+    [u'basic']
+    >>> list(v.value for v in v_enabled(None))
+    [u'basic']
+
+
+Final notes
+===========
 
 Integrators that make use of this directive should construct integration
 tests that makes use of their test layers and test via the testbrowser
 to ensure that the interactions with the registry configuration editor
 achieves the exact desired results.
+
+TODO: document how might the ordering of the enabled vocabulary on
+various manipulation methods be determined.

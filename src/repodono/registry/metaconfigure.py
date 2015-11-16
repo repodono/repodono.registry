@@ -103,7 +103,7 @@ def UtilityRegistryDirective(_context, interface, name, title,
                 'vocabulary.'
             )
             return SimpleVocabulary([])
-        enabled = registry[enabled_vocab]
+        enabled = registry[enabled_vocab] or []
         for name in enabled:
             if queryUtility(interface, name=name) is None:
                 continue

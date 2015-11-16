@@ -63,7 +63,9 @@ class UtilityRegistry(object):
             logger.warning('Plone registry is not available, doing nothing.')
             return
 
-        for n in registry[self.name] + [name]:
+        value = registry[self.name] or []
+
+        for n in value + [name]:
             if n in enabled or not queryUtility(self.interface, name=n):
                 continue
             enabled.add(unicode(n))
