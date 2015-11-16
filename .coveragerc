@@ -4,3 +4,6 @@ include =
 omit =
     */test*
     */upgrades/*
+
+exclude_lines =
+    pragma: no cover

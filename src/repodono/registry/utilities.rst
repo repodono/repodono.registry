@@ -97,6 +97,7 @@ Now construct the utility registry registration::
     ...     description=u"The set of backend utilities.",
     ...     interface=IBackend,
     ...     name=u"repodono.test.backend",
+    ...     available_vocab=u"repodono.test.backend.available",
     ... )
     >>> registration  # doctest: +ELLIPSIS
     <UtilityRegistry repodono.test.backend at ...
@@ -106,48 +107,5 @@ Now construct the utility registry registration::
     >
 
 One can use the methods provided by the registration directly to
-interact with the plone registry.  However, we don't have one yet, so
-let's mock one up first::
-
-    >>> from plone.registry.interfaces import IRegistry
-    >>> registry = {'repodono.test.backend': []}
-    >>> provideUtility(registry, IRegistry)
-
-Enabling should work as expected, ignoring names that are not
-registered::
-
-    >>> registration.enable('remote')
-    >>> registration.enable('local')
-    >>> registration.enable('unregistered')
-    >>> registry
-    {'repodono.test.backend': ['remote', 'local']}
-
-Likewise, disable should work as expected, ignoring unregistered names::
-
-    >>> registration.disable('unregistered')
-    >>> registration.disable('remote')
-    >>> registry
-    {'repodono.test.backend': ['local']}
-
-Enabling while the registry field has any extra names that may have been
-registered before should not continue to persist (triggering potential
-schema violation)::
-
-    >>> registry['repodono.test.backend'] = ['bad', 'local']
-    >>> registration.enable('remote')
-    >>> registry
-    {'repodono.test.backend': ['local', 'remote']}
-
-Likewise, disable should work as expected, ignoring unregistered names::
-
-    >>> registration.disable('unregistered')
-    >>> registration.disable('remote')
-    >>> registry
-    {'repodono.test.backend': ['local']}
-
-Calling multiple enables should not result in extra entries::
-
-    >>> registration.enable('local')
-    >>> registration.enable('local')
-    >>> registry
-    {'repodono.test.backend': ['local']}
+interact with the plone registry.  Refer to ``directives.rst`` to see
+this in action.

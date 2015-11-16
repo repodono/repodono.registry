@@ -8,7 +8,7 @@ import zope.component.testing
 path = lambda x: join('..', x)
 
 
-def setUp(suite):
+def setUp(suite):  # pragma: no cover
     zope.component.testing.setUp(suite)
 
     try:

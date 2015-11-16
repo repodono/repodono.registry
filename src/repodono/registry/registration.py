@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from zope.interface import implementer
 from zope.component import queryUtility
+from zope.schema.interfaces import IList
+from zope.schema.interfaces import IChoice
 from plone.registry.interfaces import IRegistry
 
 from repodono.registry.interfaces import IUtilityRegistry
@@ -29,11 +31,12 @@ class UtilityRegistry(object):
     makes use of this.
     """
 
-    def __init__(self, title, description, interface, name):
+    def __init__(self, title, description, interface, name, available_vocab):
         self.title = title
         self.description = description
         self.interface = interface
         self.name = name
+        self.available_vocab = available_vocab
 
     def __repr__(self):
         info = {
@@ -49,19 +52,44 @@ class UtilityRegistry(object):
         }
         return REGISTRATION_REPR.format(**info)
 
+    def verify_registry_key(self):
+        registry = queryUtility(IRegistry)
+
+        if registry is None:
+            logger.warning('Plone registry is not available, doing nothing.')
+            return False
+
+        record = registry.records.get(self.name)
+
+        if record is None:
+            logger.warning(
+                'The registry key for the utility registry `%s` is not '
+                'registered.')
+            return False
+
+        if not (IList.providedBy(record.field) and
+                IChoice.providedBy(record.field.value_type) and
+                record.field.value_type.vocabularyName ==
+                    self.available_vocab):
+            logger.warning(
+                'The registry key for the utility registry `%s` is registered '
+                'incorrectly.')
+            return False
+
+        return True
+
     def enable(self, name):
         """
         Add the ``name`` into this registry's registration in the plone
         registry.
         """
 
+        if not self.verify_registry_key():
+            return
+
         registry = queryUtility(IRegistry)
         enabled = set()
         result = []
-
-        if registry is None:
-            logger.warning('Plone registry is not available, doing nothing.')
-            return
 
         value = registry[self.name] or []
 
@@ -79,11 +107,10 @@ class UtilityRegistry(object):
         plone registry.
         """
 
-        registry = queryUtility(IRegistry)
-
-        if registry is None:
-            logger.warning('Plone registry is not available, doing nothing.')
+        if not self.verify_registry_key():
             return
+
+        registry = queryUtility(IRegistry)
 
         original = registry[self.name]
         registry[self.name] = [

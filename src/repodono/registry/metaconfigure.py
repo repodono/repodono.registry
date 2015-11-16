@@ -62,16 +62,17 @@ class IUtilityRegistryDirective(Interface):
 
 def UtilityRegistryDirective(_context, interface, name, title,
                              description=None, available_vocab=None):
+    enabled_vocab = name
+    if available_vocab is None:
+        available_vocab = name + '.available'
+
     utility_registry = UtilityRegistry(
         title=title,
         description=description,
         interface=interface,
         name=name,
+        available_vocab=available_vocab,
     )
-
-    enabled_vocab = name
-    if available_vocab is None:
-        available_vocab = name + '.available'
 
     # Register the registration for the utility registry as a utility.
     utility(
@@ -103,7 +104,7 @@ def UtilityRegistryDirective(_context, interface, name, title,
                 'vocabulary.'
             )
             return SimpleVocabulary([])
-        enabled = registry[enabled_vocab] or []
+        enabled = registry.get(enabled_vocab) or []
         for name in enabled:
             if queryUtility(interface, name=name) is None:
                 continue

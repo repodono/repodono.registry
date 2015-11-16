@@ -91,14 +91,48 @@ returned::
     True
 
 Before the enabled vocabulary will work, the actual registry utility
-will need to be available.  As the ideal editing interface is provided
-if the correct schemas are registered, the definitions that one might
-define within a ``registry.xml`` will be recreated here::
+will need to be available.  To better replicate what might happen inside
+a real Plone site, the registry utility should be availble first::
 
     >>> from plone.registry.interfaces import IRegistry
     >>> from plone.registry.registry import Registry, Record
-    >>> from plone.registry.field import List, Choice
+    >>> from plone.registry.field import List, Choice, TextLine
     >>> registry = Registry()
+    >>> sm.registerUtility(registry, IRegistry)
+
+The enable vocab should continue to return an empty list despite the
+lack of record::
+
+    >>> list(v_enabled(None)) == []
+    True
+
+The enable/disable methods should not fail on the missing key::
+
+    >>> u.enable('basic')
+    >>> u.disable('basic')
+
+Or a malformed record for that matter::
+
+    >>> registry.records['repodono.message.utility'] = Record(
+    ...     TextLine(title=u'Bad'))
+    >>> u.enable('basic')
+    >>> u.disable('basic')
+
+    >>> registry.records['repodono.message.utility'] = Record(
+    ...     List(
+    ...         title=u'Enabled Message Type',
+    ...         default=[],
+    ...         required=True,
+    ...         value_type=TextLine(title=u'Bad'),
+    ...     )
+    ... )
+    >>> u.enable('basic')
+    >>> u.disable('basic')
+
+Now add the correct record type as we have seen that this is enforced.
+This also provides a good editing interface to adminstrators.  Normally
+this is done in the ``registry.xml``, which is documented later::
+
     >>> registry.records['repodono.message.utility'] = Record(
     ...     List(
     ...         title=u'Enabled Message Type',
@@ -108,7 +142,6 @@ define within a ``registry.xml`` will be recreated here::
     ...             vocabulary='repodono.message.utility.available'),
     ...     )
     ... )
-    >>> sm.registerUtility(registry, IRegistry)
 
 The available vocabulary should start working once any of the components
 declared in the ``testing`` module be registered as a named global
@@ -151,6 +184,16 @@ Shouldn't duplicate entries::
     >>> list(t.value for t in v_enabled(None))
     [u'basic', u'advanced']
 
+Attempt to enable or disable an entry not in available shouldn't cause
+any issues::
+
+    >>> u.enable(u'no_such_thing')
+    >>> list(t.value for t in v_enabled(None))
+    [u'basic', u'advanced']
+    >>> u.disable(u'no_such_thing')
+    >>> list(t.value for t in v_enabled(None))
+    [u'basic', u'advanced']
+
 Naturally, the enabled vocabulary should never provide names that have
 been unregistered from the interface at the global level::
 
@@ -162,23 +205,32 @@ been unregistered from the interface at the global level::
     >>> registry['repodono.message.utility']
     [u'basic', u'advanced']
 
-Enabling should really disable the value and not cause any schema
-conflicts::
+Enabling should really disable values that are not registered to not
+violate the schema that may have been updated due to changes::
 
     >>> u.enable(u'luxury')
     >>> registry['repodono.message.utility']
     [u'basic', u'luxury']
 
+Disabling should work::
+
+    >>> u.disable(u'luxury')
+    >>> registry['repodono.message.utility']
+    [u'basic']
+
 Direct assignment::
 
     >>> registry['repodono.message.utility'] = [u'basic', u'luxury']
+    >>> registry['repodono.message.utility']
+    [u'basic', u'luxury']
 
-In practice, this definition is defined using XML, and integrators may
-omit the default empty list value as there are versionsn where the
-schema isn't fully created with the default empty list value.  So to
-test that the composition still works, remove the original record entry,
-then use zcml to register the required components to enable the usage of
-the dummy context to register the registry entry::
+In practice, this definition is defined using the ``registry.xml`` file,
+and integrators may omit the default empty list value as there are
+versionsn where the schema isn't fully created with the default empty
+list value.  So to test that the composition still works, remove the
+original record entry, then use zcml to register the required components
+to enable the usage of the dummy context to register the registry
+entry::
 
     >>> del registry.records['repodono.message.utility']
 
