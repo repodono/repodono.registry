@@ -66,7 +66,7 @@ class UtilityRegistry(object):
         for n in registry[self.name] + [name]:
             if n in enabled or not queryUtility(self.interface, name=n):
                 continue
-            enabled.add(n)
+            enabled.add(unicode(n))
             result.append(n)
 
         registry[self.name] = result

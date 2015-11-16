@@ -119,37 +119,37 @@ utility::
 
 The available vocabulary should reflect this::
 
-    >>> list(t.token for t in v_available(None))
-    ['basic']
+    >>> list(t.value for t in v_available(None))
+    [u'basic']
 
 If we use the utility registry to enable this term, it will also be
 shown in the enabled vocabulary::
 
-    >>> u.enable('basic')
-    >>> list(t.token for t in v_enabled(None))
-    ['basic']
+    >>> u.enable(u'basic')
+    >>> list(t.value for t in v_enabled(None))
+    [u'basic']
 
 At least until the utilities are registered::
 
     >>> sm.registerUtility(testing.AdvancedMessage(), name="advanced")
     >>> sm.registerUtility(testing.LuxuryMessage(), name="luxury")
-    >>> u.enable('advanced')
-    >>> list(t.token for t in v_enabled(None))
-    ['basic', 'advanced']
+    >>> u.enable(u'advanced')
+    >>> list(t.value for t in v_enabled(None))
+    [u'basic', u'advanced']
 
 Available version should contain everything::
 
-    >>> list(t.token for t in v_available(None))
-    ['luxury', 'advanced', 'basic']
+    >>> list(t.value for t in v_available(None))
+    [u'luxury', u'advanced', u'basic']
 
 TODO verify that the sorting is stable, and whether a sorted output is
 more desirable.
 
 Shouldn't duplicate entries::
 
-    >>> u.enable('basic')
-    >>> list(t.token for t in v_enabled(None))
-    ['basic', 'advanced']
+    >>> u.enable(u'basic')
+    >>> list(t.value for t in v_enabled(None))
+    [u'basic', u'advanced']
 
 Naturally, the enabled vocabulary should never provide names that have
 been unregistered from the interface at the global level::
@@ -157,17 +157,17 @@ been unregistered from the interface at the global level::
     >>> advanced = queryUtility(testing.IMessageUtility, 'advanced')
     >>> sm.unregisterUtility(advanced, name='advanced')
     True
-    >>> list(t.token for t in v_enabled(None))
-    ['basic']
+    >>> list(t.value for t in v_enabled(None))
+    [u'basic']
     >>> registry['repodono.message.utility']
-    ['basic', 'advanced']
+    [u'basic', u'advanced']
 
 Enabling should really disable the value and not cause any schema
 conflicts::
 
-    >>> u.enable('luxury')
+    >>> u.enable(u'luxury')
     >>> registry['repodono.message.utility']
-    ['basic', 'luxury']
+    [u'basic', u'luxury']
 
 TODO: document how might the ordering of the enabled vocabulary on
 various manipulation methods be determined.
