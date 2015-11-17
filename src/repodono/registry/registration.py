@@ -69,8 +69,8 @@ class UtilityRegistry(object):
 
         if not (IList.providedBy(record.field) and
                 IChoice.providedBy(record.field.value_type) and
-                record.field.value_type.vocabularyName ==
-                    self.available_vocab):
+                record.field.value_type.vocabularyName == self.available_vocab
+                ):
             logger.warning(
                 'The registry key for the utility registry `%s` is registered '
                 'incorrectly.', self.name)
