@@ -112,7 +112,7 @@ class UtilityRegistry(object):
 
         registry = queryUtility(IRegistry)
 
-        original = registry[self.name]
+        original = registry[self.name] or []
         registry[self.name] = [
             n for n in original
             if n != name and queryUtility(self.interface, name=n)

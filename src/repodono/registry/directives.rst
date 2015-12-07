@@ -129,6 +129,31 @@ Or a malformed record for that matter::
     >>> u.enable('basic')
     >>> u.disable('basic')
 
+Or a record with a default that is optional and not a list::
+
+    >>> registry.records['repodono.message.utility'] = Record(
+    ...     List(
+    ...         title=u'Enabled Message Type',
+    ...         required=False,
+    ...         value_type=Choice(
+    ...             vocabulary='repodono.message.utility.available'),
+    ...     )
+    ... )
+
+    >>> registry['repodono.message.utility'] = None
+    >>> registry['repodono.message.utility'] is None
+    True
+    >>> u.enable('basic')
+    >>> registry['repodono.message.utility']
+    []
+
+    >>> registry['repodono.message.utility'] = None
+    >>> registry['repodono.message.utility'] is None
+    True
+    >>> u.disable('basic')
+    >>> registry['repodono.message.utility']
+    []
+
 Now add the correct record type as we have seen that this is enforced.
 This also provides a good editing interface to adminstrators.  Normally
 this is done in the ``registry.xml``, which is documented later::
